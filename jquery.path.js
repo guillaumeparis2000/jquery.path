@@ -10,6 +10,16 @@
   })
   $("myobj").animate({path: path}, duration)
 
+  or
+
+  var path = $.path.bezier4points({
+    p1: {x:214.5, y:211},
+    p2: {x:160.5, y:232},
+    p3: {x:182.5, y:221},
+    p4: {x:167.5, y:228},
+  })
+  $("myobj").animate({path: path}, duration)
+
 */
 
 ;(function($){
@@ -51,6 +61,41 @@
 
     v43 = V.rotate(v43, params.end.angle );
     this.p3 = V.add( this.p4, v43 );
+
+    this.f1 = function(t) { return (t*t*t); };
+    this.f2 = function(t) { return (3*t*t*(1-t)); };
+    this.f3 = function(t) { return (3*t*(1-t)*(1-t)); };
+    this.f4 = function(t) { return ((1-t)*(1-t)*(1-t)); };
+
+    /* p from 0 to 1 */
+    this.css = function(p) {
+      var f1 = this.f1(p), f2 = this.f2(p), f3 = this.f3(p), f4=this.f4(p), css = {};
+      if (rotate) {
+        css.prevX = this.x;
+        css.prevY = this.y;
+      }
+      css.x = this.x = ( this.p1[0]*f1 + this.p2[0]*f2 +this.p3[0]*f3 + this.p4[0]*f4 +.5 )|0;
+      css.y = this.y = ( this.p1[1]*f1 + this.p2[1]*f2 +this.p3[1]*f3 + this.p4[1]*f4 +.5 )|0;
+      css.left = css.x + "px";
+      css.top = css.y + "px";
+      return css;
+    };
+  };
+
+  /**
+   * Create the bezier path from 4 points
+   *    p1               p2
+   *
+   *
+   *    p3               p4
+   *     
+   * @param  json params  points coordinates
+   */
+  $.path.bezier4Points = function( params ) {
+    this.p1 = [params.p1.x, params.p1.y];
+    this.p2 = [params.p2.x, params.p2.y];
+    this.p3 = [params.p3.x, params.p3.y];
+    this.p4 = [params.p4.x, params.p4.y];
 
     this.f1 = function(t) { return (t*t*t); };
     this.f2 = function(t) { return (3*t*t*(1-t)); };
